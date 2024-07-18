@@ -7,8 +7,13 @@ public:
     NumberPublisherNode() : Node("number_publisher")
     {
 
+        this->declare_parameter("number_to_publish", 2);
+        this->declare_parameter("publish_freq", 1.0);
+
+        double publish_freq = this->get_parameter("publish_freq").as_double();
+
         publisher_ = this->create_publisher<example_interfaces::msg::Int64>("number", 10);
-        timer_ = this->create_wall_timer(std::chrono::milliseconds(500), std::bind(&NumberPublisherNode::publishNews, this));
+        timer_ = this->create_wall_timer(std::chrono::milliseconds((int)(1000.0/publish_freq)), std::bind(&NumberPublisherNode::publishNews, this));
 
         RCLCPP_INFO(this->get_logger(), "Number Publisher Started...");
     }
@@ -18,7 +23,7 @@ private:
     {
 
         auto msg = example_interfaces::msg::Int64();
-        msg.data = 1;
+        msg.data = this->get_parameter("number_to_publish").as_int();
         publisher_->publish(msg);
     }
 
